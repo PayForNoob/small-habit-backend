@@ -132,19 +132,32 @@ router.get('/objectives',  async function(req, res, next) {
     return
   }
   // console.log(req.query.schedule.split(',').map(e => +e))
-  let { data, error } = await supabase
+  let { data: objectives, error } = await supabase
     .from('mainObjective')
     .select('*')
     .eq('userId', req.session.userId)
-    .eq('activated', req.query.activated)
     .overlaps(`schedule`, req.query.schedule.split(',').map(e => +e)) // 일부 포함하면 됨
   // .contains(`schedule`, [0,1,2,3,4,5,6]) // 모두 포함해야 됨
-  // console.log(data)
+
   if(error) {
     console.log(error)
     res.status(500).send(error)
   } else {
-    res.send(data)
+    // 총 실천횟수 가져오기
+    for(let i = 0; i < objectives.length; i++) {
+      let { data, error } = await supabase
+      .from('practiced')
+      .select('*')
+      .eq('objectiveId', objectives[i].id)
+
+      if(error) {
+        console.log(error)
+      } else {
+        objectives[i].totalPracticed = data.length
+      }
+    }
+    // console.log(objectives)
+    res.send(objectives)
   }
 });
 
@@ -206,7 +219,6 @@ router.put('/objectives/:id', async function(req, res, next) {
     .update(req.body)
     .eq('userId', req.session.userId)
     .eq('id', req.params.id)
-    .eq('activated', true)
 
   if(error) {
     console.log(error)
@@ -261,7 +273,7 @@ router.delete('/objectives/:id', async function(req, res, next) {
 // })
 
 // 실천여부 확인
-router.get('/practiced/:id', async function(req, res, next) {
+router.get('/practiced/:objectiveId', async function(req, res, next) {
   if(!req.session.userId) {
     res.sendStatus(401)
     return
@@ -270,7 +282,7 @@ router.get('/practiced/:id', async function(req, res, next) {
   let { data } = await supabase
     .from('practiced')
     .select('*')
-    .eq('objectiveId', req.params.id)
+    .eq('objectiveId', req.params.objectiveId)
     .eq('date', req.query.date)
     .single()
 
@@ -282,7 +294,7 @@ router.get('/practiced/:id', async function(req, res, next) {
 })
 
 // 습관 실천하기
-router.post('/practiced/:id', async function(req, res, next) {
+router.post('/practiced/:objectiveId', async function(req, res, next) {
   if(!req.session.userId) {
     res.sendStatus(401)
     return
@@ -292,7 +304,7 @@ router.post('/practiced/:id', async function(req, res, next) {
     .from('practiced')
     .insert({ 
       userId: req.session.userId,
-      objectiveId: req.params.id,
+      objectiveId: req.params.objectiveId,
       date: req.body.date
     },)
 
@@ -305,7 +317,7 @@ router.post('/practiced/:id', async function(req, res, next) {
 })
 
 // 습관 실천 취소하기
-router.delete('/practiced/:id', async function(req, res, next) {
+router.delete('/practiced/:objectiveId', async function(req, res, next) {
   if(!req.session.userId) {
     res.sendStatus(401)
     return
@@ -314,7 +326,7 @@ router.delete('/practiced/:id', async function(req, res, next) {
   let { error } = await supabase
     .from('practiced')
     .delete()
-    .eq('objectiveId', req.params.id)
+    .eq('objectiveId', req.params.objectiveId)
     .eq('date', req.query.date)
 
 
@@ -323,26 +335,6 @@ router.delete('/practiced/:id', async function(req, res, next) {
     res.status(500).send(error)
   } else {
     res.sendStatus(200)
-  }
-})
-
-// 습관 실천횟수 가져오기
-router.get('/totalpracticed/:id', async function(req, res, next) {
-  if(!req.session.userId) {
-    res.sendStatus(401)
-    return
-  }
-
-  let { data, error } = await supabase
-    .from('practiced')
-    .select('*')
-    .eq('objectiveId', req.params.id)
-
-  if(error) {
-    console.log(error)
-    res.status(500).send(error)
-  } else {
-    res.send(data)
   }
 })
 
