@@ -131,7 +131,61 @@ router.get('/objectives',  async function(req, res, next) {
     res.sendStatus(401)
     return
   }
-  // console.log(req.query.schedule.split(',').map(e => +e))
+
+  async function getDetailedObjectives() {
+    for(let i = 0; i < objectives.length; i++) {
+      let { data, error } = await supabase
+      .from('detailedObjective')
+      .select('*')
+      .eq('objectiveId', objectives[i].id)
+  
+      if(error) {
+        console.log(error)
+        res.status(500).send(error)
+      } else {
+        objectives[i].detailedObjectives = data
+      }
+    }
+  }
+
+  async function getTotalPracticed() {
+    for(let i = 0; i < objectives.length; i++) {
+      let { data, error } = await supabase
+      .from('practiced')
+      .select('*')
+      .eq('objectiveId', objectives[i].id)
+
+      if(error) {
+        console.log(error)
+        res.status(500).send(error)
+      } else {
+        objectives[i].totalPracticed = data.length
+      }
+    }
+  }
+
+  async function checkPracticed() {
+    let year = new Date().getFullYear()
+    let month = new Date().getMonth() + 1
+    let date = new Date().getDate()
+
+    let today = year + "-" + month + "-" + date
+    for(let i = 0; i < objectives.length; i++) {
+      let { data, error } = await supabase
+      .from('practiced')
+      .select('*')
+      .eq('objectiveId', objectives[i].id)
+      .eq('date', today)
+      .single()
+
+      if(data) {
+        objectives[i].practiced = true
+      } else {
+        objectives[i].practiced = false
+      }
+    }
+  }
+
   let { data: objectives, error } = await supabase
     .from('mainObjective')
     .select('*')
@@ -144,18 +198,15 @@ router.get('/objectives',  async function(req, res, next) {
     res.status(500).send(error)
   } else {
     // 총 실천횟수 가져오기
-    for(let i = 0; i < objectives.length; i++) {
-      let { data, error } = await supabase
-      .from('practiced')
-      .select('*')
-      .eq('objectiveId', objectives[i].id)
+    await getTotalPracticed()
 
-      if(error) {
-        console.log(error)
-      } else {
-        objectives[i].totalPracticed = data.length
-      }
-    }
+    // 세부습관 가져오기
+    await getDetailedObjectives()
+
+
+    // 실천여부 확인 
+    await checkPracticed()
+
     // console.log(objectives)
     res.send(objectives)
   }
@@ -182,6 +233,29 @@ router.get('/objectives/:id',  async function(req, res, next) {
     res.send(data)
   }
 });
+
+// 세부습관 가져오기
+router.get('/detailedObjective/:id',  async function(req, res, next) { 
+  if(!req.session.userId) {
+    res.sendStatus(401)
+    return
+  }
+
+  let { data, error } = await supabase
+    .from('detailedObjective')
+    .select('*')
+    .eq('userId', req.session.userId)
+    .eq('objectiveId', req.params.id)
+    
+  // console.log(data)
+  if(error) {
+    console.log(error)
+    res.status(500).send(error)
+  } else {
+    res.send(data)
+  }
+});
+
 
 ////////////
 // 신규습관 생성
