@@ -235,7 +235,7 @@ router.get('/objectives/:id',  async function(req, res, next) {
 });
 
 // 세부습관 가져오기
-router.get('/detailedObjective/:id',  async function(req, res, next) { 
+router.get('/detailedObjectives/:id',  async function(req, res, next) { 
   if(!req.session.userId) {
     res.sendStatus(401)
     return
@@ -352,7 +352,7 @@ router.get('/practiced/:objectiveId', async function(req, res, next) {
     res.sendStatus(401)
     return
   }
-
+  
   let { data } = await supabase
     .from('practiced')
     .select('*')
