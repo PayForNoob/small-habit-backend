@@ -235,7 +235,7 @@ router.get('/objectives/:id',  async function(req, res, next) {
 });
 
 // 세부습관 가져오기
-router.get('/detailedObjectives/:id',  async function(req, res, next) { 
+router.get('/detailedObjectives/:objectiveId',  async function(req, res, next) { 
   if(!req.session.userId) {
     res.sendStatus(401)
     return
@@ -245,7 +245,7 @@ router.get('/detailedObjectives/:id',  async function(req, res, next) {
     .from('detailedObjective')
     .select('*')
     .eq('userId', req.session.userId)
-    .eq('objectiveId', req.params.id)
+    .eq('objectiveId', req.params.objectiveId)
     
   // console.log(data)
   if(error) {
@@ -280,6 +280,30 @@ router.post('/objectives', async function(req, res, next) {
   }
 })
 
+// 세부습관 생성
+router.post('/detailedObjectives/:objectiveId',  async function(req, res, next) { 
+  if(!req.session.userId) {
+    res.sendStatus(401)
+    return
+  }
+
+  let { data, error } = await supabase
+    .from('detailedObjective')
+    .insert({ 
+      userId: req.session.userId,
+      objectiveId: req.params.objectiveId,
+      objective: req.body.objective 
+    })
+    
+  // console.log(data)
+  if(error) {
+    console.log(error)
+    res.status(500).send(error)
+  } else {
+    res.send(data)
+  }
+});
+
 /////////////////
 // 습관수정
 router.put('/objectives/:id', async function(req, res, next) { 
@@ -301,6 +325,29 @@ router.put('/objectives/:id', async function(req, res, next) {
     res.sendStatus(200)
   }
 })
+
+// 세부습관 수정
+router.put('/detailedObjectives/:id',  async function(req, res, next) { 
+  if(!req.session.userId) {
+    res.sendStatus(401)
+    return
+  }
+
+  let { data, error } = await supabase
+    .from('detailedObjective')
+    .select('*')
+    .update(req.body.objective)
+    .eq('userId', req.session.userId)
+    .eq('id', req.params.id)
+    
+  // console.log(data)
+  if(error) {
+    console.log(error)
+    res.status(500).send(error)
+  } else {
+    res.send(data)
+  }
+});
 
 //////////////////
 // 습관삭제
@@ -345,6 +392,29 @@ router.delete('/objectives/:id', async function(req, res, next) {
 //     res.sendStatus(200)
 //   }
 // })
+
+// 세부습관 삭제
+router.post('/detailedObjectives/:id',  async function(req, res, next) { 
+  if(!req.session.userId) {
+    res.sendStatus(401)
+    return
+  }
+
+  let { data, error } = await supabase
+    .from('detailedObjective')
+    .select('*')
+    .delete()
+    .eq('userId', req.session.userId)
+    .eq('id', req.params.id)
+    
+  // console.log(data)
+  if(error) {
+    console.log(error)
+    res.status(500).send(error)
+  } else {
+    res.send(data)
+  }
+});
 
 // 실천여부 확인
 router.get('/practiced/:objectiveId', async function(req, res, next) {
