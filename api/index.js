@@ -218,7 +218,7 @@ router.get('/objectives/:id',  async function(req, res, next) {
     res.sendStatus(401)
     return
   }
-  console.log(req.query.schedule.split(',').map(e => +e))
+  console.log(req.params)
   let { data, error } = await supabase
     .from('mainObjective')
     .select('*')
