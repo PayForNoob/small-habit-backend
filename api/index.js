@@ -218,7 +218,7 @@ router.get('/objectives/:id',  async function(req, res, next) {
     res.sendStatus(401)
     return
   }
-  console.log(req.params)
+  // console.log(req.params)
   let { data, error } = await supabase
     .from('mainObjective')
     .select('*')
@@ -394,7 +394,7 @@ router.delete('/objectives/:id', async function(req, res, next) {
 // })
 
 // 세부습관 삭제
-router.post('/detailedObjectives/:id',  async function(req, res, next) { 
+router.delete('/detailedObjectives/:id',  async function(req, res, next) { 
   if(!req.session.userId) {
     res.sendStatus(401)
     return
