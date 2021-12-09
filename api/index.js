@@ -402,7 +402,6 @@ router.delete('/detailedObjectives/:id',  async function(req, res, next) {
 
   let { data, error } = await supabase
     .from('detailedObjective')
-    .select('*')
     .delete()
     .eq('userId', req.session.userId)
     .eq('id', req.params.id)
