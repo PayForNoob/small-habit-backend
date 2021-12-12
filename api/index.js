@@ -351,7 +351,7 @@ router.put('/detailedObjectives/:id',  async function(req, res, next) {
 
 //////////////////
 // 습관삭제
-router.delete('/objectives/:id', async function(req, res, next) {
+router.delete('/objective/:id', async function(req, res, next) {
   if(!req.session.userId) {
     res.sendStatus(401)
     return
@@ -361,7 +361,7 @@ router.delete('/objectives/:id', async function(req, res, next) {
     .from('practiced')
     .delete()
     .eq('userId', req.session.userId)
-    .eq('ovjectiveId', req.params.id)
+    .eq('objectiveId', req.params.id)
   
     if(error) {
       console.log(error)
