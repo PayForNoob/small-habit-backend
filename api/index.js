@@ -356,19 +356,52 @@ router.delete('/objectives/:id', async function(req, res, next) {
     res.sendStatus(401)
     return
   }
+  async function deletePracticed() {
+    let { error } = await supabase
+    .from('practiced')
+    .delete()
+    .eq('userId', req.session.userId)
+    .eq('ovjectiveId', req.params.id)
   
-  let { error } = await supabase
+    if(error) {
+      console.log(error)
+      res.status(500).send(error)
+    } else {
+      deleteDetailedObjective()
+    }
+  }
+  
+  async function deleteDetailedObjective() {
+    let { error } = await supabase
+    .from('detailedObjective')
+    .delete()
+    .eq('userId', req.session.userId)
+    .eq('objectiveId', req.params.id)
+  
+    if(error) {
+      console.log(error)
+      res.status(500).send(error)
+    } else {
+      deleteMainObjective()
+    }
+  } 
+
+  async function deleteMainObjective() {
+    let { error } = await supabase
     .from('mainObjective')
     .delete()
     .eq('userId', req.session.userId)
     .eq('id', req.params.id)
-
-  if(error) {
-    console.log(error)
-    res.status(500).send(error)
-  } else {
-    res.sendStatus(200)
+  
+    if(error) {
+      console.log(error)
+      res.status(500).send(error)
+    } else {
+      res.sendStatus(200)
+    }
   }
+
+  deletePracticed()
 })
 
 // router.delete('/objectives', async function(req, res, next) {
@@ -487,9 +520,9 @@ router.delete('/withdrawal', async function(req, res, next) {
     res.sendStatus(401)
     return
   }
-  async function deletePractived() {
+  async function deletePracticed() {
     let { error } = await supabase
-    .from('mainObjective')
+    .from('practiced')
     .delete()
     .eq('userId', req.session.userId)
   
@@ -544,7 +577,7 @@ router.delete('/withdrawal', async function(req, res, next) {
     }
   }
 
-  deletePractived()
+  deletePracticed()
 })
 
 module.exports = router;
