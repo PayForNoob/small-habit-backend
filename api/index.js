@@ -264,8 +264,7 @@ router.post('/objectives', async function(req, res, next) {
     res.sendStatus(401)
     return
   }
-
-  let { error } = await supabase
+  let { data, error } = await supabase
     .from('mainObjective')
     .insert({ 
       userId: req.session.userId,
@@ -276,7 +275,7 @@ router.post('/objectives', async function(req, res, next) {
     console.log(error)
     res.status(500).send(error)
   } else {
-    res.sendStatus(200)
+    res.status(200).send(data[0])
   }
 })
 
@@ -312,7 +311,7 @@ router.put('/objectives/:id', async function(req, res, next) {
     return
   }
   
-  let { error } = await supabase
+  let { data, error } = await supabase
     .from('mainObjective')
     .update(req.body)
     .eq('userId', req.session.userId)
@@ -322,7 +321,7 @@ router.put('/objectives/:id', async function(req, res, next) {
     console.log(error)
     res.status(500).send(error)
   } else {
-    res.sendStatus(200)
+    res.status(200).send(data[0])
   }
 })
 
@@ -335,7 +334,6 @@ router.put('/detailedObjectives/:id',  async function(req, res, next) {
 
   let { data, error } = await supabase
     .from('detailedObjective')
-    .select('*')
     .update(req.body.objective)
     .eq('userId', req.session.userId)
     .eq('id', req.params.id)
