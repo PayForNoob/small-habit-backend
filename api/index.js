@@ -334,11 +334,11 @@ router.put('/detailedObjectives/:id',  async function(req, res, next) {
 
   let { data, error } = await supabase
     .from('detailedObjective')
-    .update(req.body.objective)
+    .update(req.body)
     .eq('userId', req.session.userId)
     .eq('id', req.params.id)
     
-  // console.log(data)
+  console.log(req.body)
   if(error) {
     console.log(error)
     res.status(500).send(error)
