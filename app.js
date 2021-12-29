@@ -23,8 +23,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(join(__dirname, 'public')));
 
-
-
 app.use('/api', apiRouter);
 
 // catch 404 and forward to error handler
